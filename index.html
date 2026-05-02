@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyBestie — Your AI Study Companion</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #0071e3;
+      --blue-light: #e8f2fd;
+      --text: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --bg: #ffffff;
+      --bg-soft: #f5f5f7;
+      --border: #e5e5ea;
+      --green: #34c759;
+      --red: #ff3b30;
+      --amber: #ff9500;
+      --bubble-out: #0071e3;
+      --bubble-in: #e9e9eb;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+    .nav-logo { font-size: 17px; font-weight: 600; color: var(--text); }
+    .nav-cta {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 980px;
+      padding: 8px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* ── FREE SLOTS BANNER ── */
+    .slots-banner {
+      background: #fff8e6;
+      border-bottom: 1px solid #ffe5a0;
+      text-align: center;
+      padding: 10px 24px;
+      font-size: 14px;
+      color: #7a5800;
+      font-weight: 500;
+    }
+    .slots-banner strong { color: #5a3e00; }
+    .slots-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+    }
+    .slot-pip {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .slot-pip.taken { background: #ff9500; }
+    .slot-pip.free { background: #c8e6c9; border: 1px solid #a5d6a7; }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 80px 24px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    section.wide { max-width: 960px; }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding-top: 80px;
+      padding-bottom: 72px;
+    }
+    .hero-eyebrow {
+      display: inline-block;
+      background: var(--blue-light);
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-radius: 980px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 62px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .hero h1 span { color: var(--blue); }
+    .hero-sub {
+      font-size: clamp(17px, 2.5vw, 21px);
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 16px;
+      line-height: 1.5;
+    }
+    .hero-what {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      background: var(--bg-soft);
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 12px;
+    }
+    .hero-what strong { color: var(--text); }
+    .hero-cta-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 980px;
+      padding: 14px 28px;
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-secondary {
+      background: var(--bg-soft);
+      color: var(--text);
+      border: none;
+      border-radius: 980px;
+      padding: 14px 28px;
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .hero-price-note {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .hero-price-note strong { color: var(--green); }
+
+    /* ── SURVIVAL SCORE ── */
+    .survival-section { background: var(--bg-soft); }
+    .survival-section section { padding: 72px 24px; }
+
+    .score-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      max-width: 520px;
+      margin: 32px auto 0;
+    }
+    .score-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .score-card .score-sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .quiz-question {
+      margin-bottom: 22px;
+    }
+    .quiz-q-label {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quiz-option {
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      color: var(--text);
+    }
+    .quiz-option:hover { border-color: var(--blue); background: var(--blue-light); }
+    .quiz-option.selected { border-color: var(--blue); background: var(--blue-light); color: var(--blue); font-weight: 500; }
+    .score-submit {
+      width: 100%;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 980px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+      opacity: 0.5;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .score-submit.ready { opacity: 1; pointer-events: all; }
+
+    .score-result {
+      display: none;
+      text-align: center;
+      padding: 8px 0;
+    }
+    .score-result.show { display: block; }
+    .score-emoji { font-size: 52px; margin-bottom: 12px; }
+    .score-status {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .score-status.critical { color: var(--red); }
+    .score-status.hanging { color: var(--amber); }
+    .score-status.solid { color: #1a7a32; }
+    .score-desc {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .score-cta {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 980px;
+      padding: 13px 26px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .score-retry {
+      display: block;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+    }
+
+    /* ── PROBLEM ── */
+    .problem-bg { background: var(--bg); }
+    .label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .body-text {
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .pain-list {
+      list-style: none;
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .pain-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 17px;
+      color: var(--text);
+    }
+    .pain-list .icon {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: #ff3b3020;
+      color: #ff3b30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ── WHAT IT IS ── */
+    .what-strip {
+      background: var(--blue);
+      color: #fff;
+      padding: 48px 24px;
+    }
+    .what-strip-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .what-strip h2 { color: #fff; margin-bottom: 12px; }
+    .what-strip p { font-size: 18px; opacity: 0.85; line-height: 1.6; margin-bottom: 28px; }
+    .what-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .chip {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 980px;
+      padding: 8px 16px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    /* ── SOLUTION CARDS ── */
+    .solution-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 36px;
+    }
+    .solution-card {
+      background: var(--bg-soft);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .solution-card .card-icon { font-size: 28px; margin-bottom: 12px; }
+    .solution-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .solution-card p { font-size: 15px; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ── DEMO SECTION with TABS ── */
+    .demo-section { background: var(--bg-soft); }
+    .demo-section section { padding: 80px 24px; }
+
+    .demo-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 28px 0 0;
+      flex-wrap: wrap;
+    }
+    .demo-tab {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 980px;
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+    }
+    .demo-tab.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    .demo-panel { display: none; }
+    .demo-panel.active { display: block; }
+
+    .demo-scenario-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 20px 0 0;
+      line-height: 1.5;
+    }
+
+    .phone-frame {
+      max-width: 360px;
+      margin: 24px auto 0;
+      background: #fff;
+      border-radius: 40px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .phone-header {
+      background: #f9f9f9;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .phone-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0071e3, #34aadc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .phone-name { font-size: 15px; font-weight: 600; color: var(--text); }
+    .phone-status { font-size: 12px; color: var(--green); font-weight: 500; }
+    .chat-body {
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #fff;
+    }
+    .chat-date {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 4px 0 8px;
+    }
+    .bubble-row { display: flex; align-items: flex-end; gap: 6px; }
+    .bubble-row.out { justify-content: flex-end; }
+    .bubble-row.in { justify-content: flex-start; }
+    .bubble {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .bubble.out {
+      background: var(--bubble-out);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .bubble.in {
+      background: var(--bubble-in);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+    }
+    .bubble strong { font-weight: 600; }
+    .bubble .memory-tag {
+      display: inline-block;
+      background: rgba(52,199,89,0.15);
+      color: #1a7a32;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      padding: 1px 6px;
+      margin-bottom: 4px;
+    }
+    .bubble .pattern-tag {
+      display: inline-block;
+      background: rgba(0,113,227,0.1);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      padding: 1px 6px;
+      margin-bottom: 4px;
+    }
+    .chat-input-bar {
+      background: #f9f9f9;
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chat-input-fake {
+      flex: 1;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 14px;
+      color: #bbb;
+    }
+    .send-btn {
+      width: 30px; height: 30px;
+      background: var(--blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    /* ── FLOW CALLOUTS ── */
+    .flow-callouts {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .callout-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .callout h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .callout p { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+
+    /* ── HOW IT WORKS ── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 40px;
+    }
+    .step {
+      display: flex;
+      gap: 24px;
+      padding-bottom: 40px;
+      position: relative;
+    }
+    .step:last-child { padding-bottom: 0; }
+    .step-num {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .step-line {
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+    .step:last-child .step-line { display: none; }
+    .step-content h3 { font-size: 19px; font-weight: 600; margin-bottom: 6px; }
+    .step-content p { font-size: 16px; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ── LIFECYCLE ── */
+    .lifecycle-scroll {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 4px 24px 16px;
+      margin: 24px -24px 0;
+      scrollbar-width: none;
+    }
+    .lifecycle-scroll::-webkit-scrollbar { display: none; }
+    .stage-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      min-width: 200px;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .stage-card.active { border-color: var(--blue); background: var(--blue-light); }
+    .stage-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .stage-card.active .stage-label { color: var(--blue); }
+    .stage-card h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .stage-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      text-align: center;
+      background: var(--bg-soft);
+      border-radius: 24px;
+      padding: 64px 32px;
+      margin: 80px 24px;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .final-cta h2 { margin-bottom: 12px; }
+    .final-cta .cta-sub { font-size: 18px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.6; }
+    .free-badge {
+      display: inline-block;
+      background: #e8f9ef;
+      border: 1px solid #a5d6a7;
+      color: #1a7a32;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 980px;
+      padding: 6px 16px;
+      margin-bottom: 24px;
+    }
+    .waitlist-form {
+      display: flex;
+      gap: 8px;
+      max-width: 400px;
+      margin: 0 auto 16px;
+    }
+    .waitlist-form input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 980px;
+      padding: 13px 18px;
+      font-size: 16px;
+      outline: none;
+      background: #fff;
+    }
+    .waitlist-form input:focus { border-color: var(--blue); }
+    .waitlist-form button {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 980px;
+      padding: 13px 22px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .pricing-note {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+    .pricing-note strong { color: var(--text); }
+
+    /* ── SUPERPOWER SECTION ── */
+    .superpower-section { background: var(--bg); }
+    .superpower-section section { padding: 80px 24px; }
+
+    .superpower-intro {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      background: var(--bg-soft);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+    .superpower-icon { font-size: 36px; flex-shrink: 0; }
+    .superpower-intro h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .superpower-intro p { font-size: 16px; color: var(--text-secondary); line-height: 1.6; }
+
+    .superpower-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .superpower-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .sc-trigger {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .sc-chat-bubble {
+      background: var(--blue);
+      color: #fff;
+      border-radius: 18px;
+      border-bottom-right-radius: 4px;
+      padding: 10px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 80%;
+    }
+    .sc-trigger-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      flex-shrink: 0;
+      padding-top: 10px;
+    }
+
+    .sc-response {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: #fafafa;
+    }
+    .sc-bot-bubble {
+      background: var(--bubble-in);
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      padding: 10px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 85%;
+    }
+    .sc-bot-bubble .link-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--blue);
+      color: #fff;
+      border-radius: 980px;
+      padding: 5px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-top: 8px;
+    }
+
+    /* Browser frame mockup */
+    .browser-frame {
+      margin: 0;
+      background: #fff;
+    }
+    .browser-bar {
+      background: #f0f0f5;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .browser-dots { display: flex; gap: 5px; }
+    .browser-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .browser-dot.red { background: #ff5f57; }
+    .browser-dot.amber { background: #febc2e; }
+    .browser-dot.green { background: #28c840; }
+    .browser-url {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .browser-content {
+      padding: 20px;
+      min-height: 160px;
+    }
+
+    /* Krebs interactive preview */
+    .krebs-preview h4 { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+    .krebs-stages {
+      display: flex;
+      gap: 0;
+      align-items: center;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .krebs-stage {
+      background: var(--blue-light);
+      border: 2px solid var(--blue);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      text-align: center;
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+    .krebs-stage.active { background: var(--blue); color: #fff; }
+    .krebs-stage .stage-name { font-weight: 700; font-size: 11px; }
+    .krebs-stage .stage-output { font-size: 10px; opacity: 0.75; margin-top: 3px; }
+    .krebs-arrow { font-size: 16px; color: var(--text-secondary); padding: 0 4px; flex-shrink: 0; }
+    .krebs-outputs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .krebs-chip {
+      background: #e8f9ef;
+      border: 1px solid #a5d6a7;
+      color: #1a7a32;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    /* Video transcript preview */
+    .transcript-preview {}
+    .video-stub {
+      background: #1d1d1f;
+      border-radius: 10px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .video-stub .play-btn {
+      width: 32px; height: 32px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+    }
+    .video-stub span { color: #aaa; font-size: 12px; }
+    .transcript-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .t-card {
+      background: var(--bg-soft);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .t-card .t-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--blue); margin-bottom: 4px; }
+    .t-card .t-val { font-size: 12px; color: var(--text); line-height: 1.4; }
+
+    /* Quiz preview */
+    .quiz-preview h4 { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+    .quiz-q { font-size: 13px; color: var(--text); margin-bottom: 10px; font-weight: 500; line-height: 1.4; }
+    .quiz-opts-preview { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    .quiz-opt-prev {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .quiz-opt-prev.correct { background: #e8f9ef; border-color: #a5d6a7; color: #1a7a32; font-weight: 500; }
+    .quiz-opt-prev.wrong { background: #fff0f0; border-color: #ffb3b3; color: #cc0000; }
+    .quiz-score-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .score-bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .score-bar-fill { height: 100%; background: var(--green); border-radius: 3px; }
+
+    /* ── SLOTS REMAINING ── */
+    .slots-remaining {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #7a5800;
+      font-weight: 500;
+    }
+    .slots-pips { display: flex; gap: 5px; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .hero { padding-top: 56px; }
+      .waitlist-form { flex-direction: column; }
+      .waitlist-form button { border-radius: 980px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- FREE SLOTS BANNER -->
+<div class="slots-banner">
+  🎉 Founding cohort — <strong>first 5 students get it free.</strong>
+  <span class="slots-count">
+    <span class="slot-pip taken"></span>
+    <span class="slot-pip taken"></span>
+    <span class="slot-pip taken"></span>
+    <span class="slot-pip free"></span>
+    <span class="slot-pip free"></span>
+  </span>
+  &nbsp;3 taken · <strong>2 spots left</strong>
+</div>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">StudyBestie ✦</span>
+  <a href="#waitlist" class="nav-cta">Claim Free Spot</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <section>
+    <span class="hero-eyebrow">An AI assistant in Telegram · Chat or talk to it, it knows your subjects · Set up in 30 minutes</span>
+    <h1>Stop re-explaining yourself.<br><span>One chat. Full memory.</span><br>Knows exactly where you're stuck.</h1>
+    <p class="hero-sub">24/7 personalised study support that remembers your gaps, spots your patterns, and gets smarter every session.</p>
+    <div class="hero-what">
+      <strong>What it is:</strong> A personal AI tutor in your Telegram — like texting a brilliant friend who never forgets anything you've told them.
+    </div>
+    <div class="hero-cta-row">
+      <a href="#waitlist" class="btn-primary">Claim Your Free Spot</a>
+      <a href="#score" class="btn-secondary">Check your survival score ↓</a>
+    </div>
+    <p class="hero-price-note"><strong>Free for the first 5 students.</strong> No credit card. No catch.</p>
+  </section>
+</div>
+
+<!-- HSC SURVIVAL SCORE -->
+<div class="survival-section" id="score">
+  <section>
+    <div class="label">Quick check-in</div>
+    <h2>What's your HSC survival score?</h2>
+    <p class="body-text">Answer 3 quick questions. Find out where you actually stand.</p>
+
+    <div class="score-card">
+      <h3>🎓 HSC Survival Check</h3>
+      <p class="score-sub">Takes 30 seconds. No sign-up needed.</p>
+
+      <div id="quiz-form">
+        <!-- Q1 -->
+        <div class="quiz-question">
+          <div class="quiz-q-label">How far away is your next exam?</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-q="1" data-v="3" onclick="selectOption(this)">Less than 1 week 😬</button>
+            <button class="quiz-option" data-q="1" data-v="2" onclick="selectOption(this)">1–4 weeks</button>
+            <button class="quiz-option" data-q="1" data-v="1" onclick="selectOption(this)">1–3 months</button>
+            <button class="quiz-option" data-q="1" data-v="0" onclick="selectOption(this)">3+ months (I've got time)</button>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="quiz-question">
+          <div class="quiz-q-label">When you get feedback on an essay, do you actually understand what to fix?</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-q="2" data-v="3" onclick="selectOption(this)">Never — comments make no sense to me</button>
+            <button class="quiz-option" data-q="2" data-v="2" onclick="selectOption(this)">Sometimes — but I don't know how to act on it</button>
+            <button class="quiz-option" data-q="2" data-v="1" onclick="selectOption(this)">Usually — but it takes a while</button>
+            <button class="quiz-option" data-q="2" data-v="0" onclick="selectOption(this)">Always — I'm on top of it</button>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="quiz-question">
+          <div class="quiz-q-label">Do you have a real study plan right now?</div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-q="3" data-v="3" onclick="selectOption(this)">Lol no. I'm winging it 😅</button>
+            <button class="quiz-option" data-q="3" data-v="2" onclick="selectOption(this)">I had one but it fell apart</button>
+            <button class="quiz-option" data-q="3" data-v="1" onclick="selectOption(this)">Sort of — it's a bit messy</button>
+            <button class="quiz-option" data-q="3" data-v="0" onclick="selectOption(this)">Yes and I'm actually sticking to it</button>
+          </div>
+        </div>
+
+        <button class="score-submit" id="score-submit-btn" onclick="showResult()">See my score →</button>
+      </div>
+
+      <!-- Result -->
+      <div class="score-result" id="score-result">
+        <div class="score-emoji" id="result-emoji"></div>
+        <div class="score-status" id="result-status"></div>
+        <div class="score-desc" id="result-desc"></div>
+        <a href="#waitlist" class="score-cta">Claim your free spot →</a>
+        <button class="score-retry" onclick="resetQuiz()">Take it again</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PROBLEM -->
+<section>
+  <div class="label">The Problem</div>
+  <h2>Most study tools make you do the work twice.</h2>
+  <p class="body-text">You open the app, re-explain your situation, get a generic answer, and close it. Tomorrow you start from zero again. It never learned anything about you.</p>
+  <p class="body-text">That's not a study tool. That's just a fancier Google.</p>
+  <ul class="pain-list">
+    <li>
+      <span class="icon">✗</span>
+      <span>Switching between apps for different subjects, losing your train of thought every time</span>
+    </li>
+    <li>
+      <span class="icon">✗</span>
+      <span>Re-explaining your context every session — what you've covered, where you're stuck, how your teacher marks</span>
+    </li>
+    <li>
+      <span class="icon">✗</span>
+      <span>Generic answers that don't account for how <em>you</em> actually think and learn</span>
+    </li>
+    <li>
+      <span class="icon">✗</span>
+      <span>Nobody noticing that you keep blanking on the same topic... every single time</span>
+    </li>
+    <li>
+      <span class="icon">✗</span>
+      <span>10pm panic with nobody to ask — so you spiral instead of study</span>
+    </li>
+  </ul>
+</section>
+
+<!-- WHAT IT ACTUALLY IS -->
+<div class="what-strip">
+  <div class="what-strip-inner">
+    <h2>Here's exactly what StudyBestie is</h2>
+    <p>It's a personal AI tutor — set up for you, delivered through Telegram. One chat. No subject switching. No re-explaining. Just talk, and it remembers everything.</p>
+    <div class="what-chips">
+      <span class="chip">📱 Telegram on your home screen</span>
+      <span class="chip">🧠 Full memory across every session</span>
+      <span class="chip">🔍 Spots your patterns for you</span>
+      <span class="chip">⏰ Proactive reminders</span>
+      <span class="chip">🎓 All HSC subjects</span>
+      <span class="chip">✅ Set up for you in 30 minutes</span>
+    </div>
+  </div>
+</div>
+
+<!-- SOLUTION CARDS -->
+<section>
+  <div class="label">The Solution</div>
+  <h2>One conversation that never forgets.</h2>
+  <p class="body-text">Not an app. Not a chatbot you start fresh every time. StudyBestie is a personalised AI tutor built for you — sitting in your Telegram, ready whenever you are.</p>
+  <div class="solution-grid">
+    <div class="solution-card">
+      <div class="card-icon">💬</div>
+      <h3>Just talk</h3>
+      <p>No menus. No subject navigation. Open Telegram and type — about anything, any time.</p>
+    </div>
+    <div class="solution-card">
+      <div class="card-icon">🧠</div>
+      <h3>Always remembers</h3>
+      <p>Picks up exactly where you left off. Recalls what you've covered, where you struggled, what clicked.</p>
+    </div>
+    <div class="solution-card">
+      <div class="card-icon">📈</div>
+      <h3>Gets smarter</h3>
+      <p>Notices you keep blanking on the same topics and adapts — so you stop hitting the same wall.</p>
+    </div>
+    <div class="solution-card">
+      <div class="card-icon">🌙</div>
+      <h3>Always there</h3>
+      <p>10pm essay panic. 7am exam nerves. 2pm "I don't even know where to start." No waiting.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO SECTION -->
+<div class="demo-section" id="demo">
+  <section>
+    <div class="label">See it in action</div>
+    <h2>A typical study session with StudyBestie.</h2>
+    <p class="body-text">Real conversations — not a scripted demo. Pick a scenario you've lived through. And scroll down to see what it builds for you.</p>
+
+    <!-- Tabs -->
+    <div class="demo-tabs">
+      <button class="demo-tab active" onclick="switchTab('chem')">🧪 Chemistry essay</button>
+      <button class="demo-tab" onclick="switchTab('maths')">📐 Maths exam panic</button>
+      <button class="demo-tab" onclick="switchTab('english')">✍️ English Module B</button>
+    </div>
+
+    <!-- SCENARIO 1: Chemistry -->
+    <div class="demo-panel active" id="tab-chem">
+      <p class="demo-scenario-label">Maya has a Chemistry essay due tomorrow and has been stuck on the Krebs cycle for weeks.</p>
+      <div class="phone-frame">
+        <div class="phone-header">
+          <div class="phone-avatar">🤖</div>
+          <div>
+            <div class="phone-name">StudyBestie</div>
+            <div class="phone-status">● Online</div>
+          </div>
+        </div>
+        <div class="chat-body">
+          <div class="chat-date">Tonight, 9:47 PM</div>
+          <div class="bubble-row out">
+            <div class="bubble out">I have a Chemistry essay due tomorrow on cellular respiration and I literally have no idea where to start 😭</div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              <span class="memory-tag">💾 Remembered</span><br>
+              You've been working on cellular respiration since last week — glycolysis you got. The Krebs cycle is where you said things went foggy.<br><br>
+              What does your teacher want — explain-and-evaluate, or more analytical?
+            </div>
+          </div>
+          <div class="bubble-row out">
+            <div class="bubble out">Explain and evaluate. Cover the full process and say why it matters</div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              Three-part structure you can write tonight:<br><br>
+              <strong>Intro</strong> — define cellular respiration, state its significance<br>
+              <strong>Body 1–3</strong> — glycolysis → Krebs → electron transport chain<br>
+              <strong>Evaluation</strong> — aerobic vs anaerobic efficiency<br><br>
+              Want me to draft the Krebs paragraph? That's the one you've flagged before.
+            </div>
+          </div>
+          <div class="bubble-row out">
+            <div class="bubble out">yes please — I always blank on it</div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              <span class="pattern-tag">🔍 Pattern spotted</span><br>
+              Third time you've blanked on Krebs. Adding it to your weak spots so we work on it properly — not just tonight.<br><br>
+              "The Krebs cycle, in the mitochondrial matrix, produces 3 NADH, 1 FADH₂ and 1 ATP per turn, releasing 2CO₂. Two turns per glucose molecule. These electron carriers drive ATP synthesis in the electron transport chain."<br><br>
+              Make it sound like you — and I'll remind you to review this before your next Chem test 📚
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <div class="chat-input-fake">Message StudyBestie...</div>
+          <div class="send-btn">↑</div>
+        </div>
+      </div>
+      <div class="flow-callouts">
+        <div class="callout">
+          <div class="callout-icon" style="background:#e8f2fd;">🧠</div>
+          <div><h4>Persistent memory</h4><p>Picked up last week's session — no re-explaining needed.</p></div>
+        </div>
+        <div class="callout">
+          <div class="callout-icon" style="background:#e8f9ef;">🔍</div>
+          <div><h4>Pattern spotted</h4><p>Third time blanking on Krebs — flagged for follow-up automatically.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO 2: Maths exam panic -->
+    <div class="demo-panel" id="tab-maths">
+      <p class="demo-scenario-label">Jordan has a Maths Advanced exam in 2 hours and just realised he can't do integration by substitution.</p>
+      <div class="phone-frame">
+        <div class="phone-header">
+          <div class="phone-avatar">🤖</div>
+          <div>
+            <div class="phone-name">StudyBestie</div>
+            <div class="phone-status">● Online</div>
+          </div>
+        </div>
+        <div class="chat-body">
+          <div class="chat-date">Today, 7:58 AM</div>
+          <div class="bubble-row out">
+            <div class="bubble out">exam in 2 hours and i just realised i have no idea how to do integration by substitution send help 😰</div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              <span class="memory-tag">💾 Remembered</span><br>
+              You nailed differentiation last week — substitution is just running that backwards. You've got this.<br><br>
+              Two hours is enough. Here's the method in 3 steps — no fluff:<br><br>
+              <strong>1.</strong> Spot a chunk inside the integral that looks like it could be u<br>
+              <strong>2.</strong> Write u = that chunk, then find du/dx and rearrange for dx<br>
+              <strong>3.</strong> Substitute everything in, integrate the clean version, put u back<br><br>
+              Want a worked example right now?
+            </div>
+          </div>
+          <div class="bubble-row out">
+            <div class="bubble out">yes please — like ∫2x(x²+1)⁵ dx</div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              Let u = x² + 1, so du/dx = 2x, meaning dx = du/2x<br><br>
+              Substitute: ∫2x · u⁵ · du/2x = ∫u⁵ du<br><br>
+              Integrate: u⁶/6 + c<br><br>
+              Put u back: <strong>(x²+1)⁶/6 + c</strong><br><br>
+              The 2x cancels — that's the trick the examiners love. See it?
+            </div>
+          </div>
+          <div class="bubble-row out">
+            <div class="bubble out">omg yes that makes sense now</div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              <span class="pattern-tag">⏰ Reminder set</span><br>
+              Good. Do 2 more on your own before you leave. I've queued up a substitution drill for after your exam so it sticks — you won't blank on this again.<br><br>
+              Go smash it 💪
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <div class="chat-input-fake">Message StudyBestie...</div>
+          <div class="send-btn">↑</div>
+        </div>
+      </div>
+      <div class="flow-callouts">
+        <div class="callout">
+          <div class="callout-icon" style="background:#e8f2fd;">🧠</div>
+          <div><h4>Connected past knowledge</h4><p>Linked substitution to differentiation Jordan already knew — clicked immediately.</p></div>
+        </div>
+        <div class="callout">
+          <div class="callout-icon" style="background:#fff3e0;">⏰</div>
+          <div><h4>Follow-up drill queued</h4><p>Scheduled a consolidation exercise post-exam so the concept sticks.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO 3: English Module B -->
+    <div class="demo-panel" id="tab-english">
+      <p class="demo-scenario-label">Priya is writing her first Module B extended response and doesn't know how to start her argument.</p>
+      <div class="phone-frame">
+        <div class="phone-header">
+          <div class="phone-avatar">🤖</div>
+          <div>
+            <div class="phone-name">StudyBestie</div>
+            <div class="phone-status">● Online</div>
+          </div>
+        </div>
+        <div class="chat-body">
+          <div class="chat-date">Yesterday, 4:22 PM</div>
+          <div class="bubble-row out">
+            <div class="bubble out">how do i even start a Module B essay?? like do I just describe the text or do i have to have an argument straight away</div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              <span class="memory-tag">💾 Remembered</span><br>
+              Your text is The Great Gatsby — you said last week you're doing "the corruption of the American Dream."<br><br>
+              Module B is about your reading of the text — so yes, argument straight away. Markers want to see your perspective from line one.<br><br>
+              A strong opener does three things: names the text and composer, states your central argument, hints at your technique focus. Like this:
+            </div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              "Fitzgerald's <em>The Great Gatsby</em> constructs the American Dream as fundamentally corrupt — not through failure, but through the very act of achievement."<br><br>
+              That's your thesis. Everything in the essay proves that one idea. Does that match what you're arguing?
+            </div>
+          </div>
+          <div class="bubble-row out">
+            <div class="bubble out">yes that's exactly it!! but I never know what to do with techniques — like do I list them or what</div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              Don't list. Embed them to prove your argument.<br><br>
+              Instead of: "Fitzgerald uses colour symbolism."<br><br>
+              Try: "The recurring <strong>green light</strong> — a symbol of perpetual longing — positions Gatsby as forever reaching toward a dream he can never hold, reinforcing Fitzgerald's critique that desire, not attainment, defines the American psyche."<br><br>
+              See how the technique proves the argument? That's what gets you into Band 6 territory.
+            </div>
+          </div>
+          <div class="bubble-row out">
+            <div class="bubble out">okay that actually makes sense now</div>
+          </div>
+          <div class="bubble-row in">
+            <div class="bubble in">
+              <span class="pattern-tag">🔍 Noted</span><br>
+              You always get the ideas — it's the technique integration you find tricky. I'll keep drilling that pattern with you. Send me your intro when you've drafted it and I'll give you honest feedback 📝
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <div class="chat-input-fake">Message StudyBestie...</div>
+          <div class="send-btn">↑</div>
+        </div>
+      </div>
+      <div class="flow-callouts">
+        <div class="callout">
+          <div class="callout-icon" style="background:#e8f2fd;">🧠</div>
+          <div><h4>Remembered the text</h4><p>No re-explaining needed — picked up Priya's Gatsby focus from last week.</p></div>
+        </div>
+        <div class="callout">
+          <div class="callout-icon" style="background:#e8f9ef;">🔍</div>
+          <div><h4>Gap identified</h4><p>Spotted the technique integration struggle — will target it going forward.</p></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<!-- THE SUPERPOWER -->
+<div class="superpower-section">
+  <section>
+    <div class="label">The superpower</div>
+    <h2>Chat is the interface.<br>This is what it builds.</h2>
+    <p class="body-text">Most AI tools give you text back. StudyBestie builds things for you — interactive study tools, visual summaries, practice quizzes — and sends you a link. Straight to your Telegram. Opens in your browser.</p>
+
+    <div class="superpower-intro">
+      <div class="superpower-icon">⚡</div>
+      <div>
+        <h3>On-demand interactive tools, generated in seconds</h3>
+        <p>You ask. It builds. Whether that's a clickable summary of a concept you can't crack, a transcript of a study video turned into flashcards, or a timed quiz that adapts to your weak spots — it's all one message away.</p>
+      </div>
+    </div>
+
+    <div class="superpower-grid">
+
+      <!-- CARD 1: Interactive study guide -->
+      <div class="superpower-card">
+        <div class="sc-trigger">
+          <div>
+            <div class="sc-chat-bubble">I keep blanking on the Krebs cycle. Can you make me something I can actually study from?</div>
+          </div>
+          <div class="sc-trigger-label">You →</div>
+        </div>
+        <div class="sc-response">
+          <div>
+            <div class="sc-bot-bubble">
+              Built you an interactive summary — tap through each stage, see what it outputs, and I've pre-loaded the bits you always forget.
+              <div class="link-pill">🔗 Open: krebs-cycle-guide.html</div>
+            </div>
+          </div>
+        </div>
+        <div class="browser-frame">
+          <div class="browser-bar">
+            <div class="browser-dots">
+              <div class="browser-dot red"></div>
+              <div class="browser-dot amber"></div>
+              <div class="browser-dot green"></div>
+            </div>
+            <div class="browser-url">studybestie.app/tools/maya/krebs-cycle-guide</div>
+          </div>
+          <div class="browser-content">
+            <div class="krebs-preview">
+              <h4>🧪 Krebs Cycle — Interactive Summary</h4>
+              <div class="krebs-stages">
+                <div class="krebs-stage">
+                  <div class="stage-name">Glycolysis</div>
+                  <div class="stage-output">2 ATP</div>
+                </div>
+                <div class="krebs-arrow">→</div>
+                <div class="krebs-stage active">
+                  <div class="stage-name">Krebs Cycle</div>
+                  <div class="stage-output">Tap to expand</div>
+                </div>
+                <div class="krebs-arrow">→</div>
+                <div class="krebs-stage">
+                  <div class="stage-name">ETC</div>
+                  <div class="stage-output">32–34 ATP</div>
+                </div>
+              </div>
+              <div class="krebs-outputs">
+                <span class="krebs-chip">3 NADH per turn</span>
+                <span class="krebs-chip">1 FADH₂ per turn</span>
+                <span class="krebs-chip">1 ATP per turn</span>
+                <span class="krebs-chip">2 CO₂ released</span>
+                <span class="krebs-chip">× 2 turns per glucose</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: TikTok / Instagram video → study material -->
+      <div class="superpower-card">
+        <div class="sc-trigger">
+          <div>
+            <div class="sc-chat-bubble">Found this TikTok that explains mitosis really well — can you turn it into study notes I can use? [video link]</div>
+          </div>
+          <div class="sc-trigger-label">You →</div>
+        </div>
+        <div class="sc-response">
+          <div>
+            <div class="sc-bot-bubble">
+              Transcribed and structured it for you. Key concepts, stages, and a quick self-check at the bottom.
+              <div class="link-pill">🔗 Open: mitosis-from-video.html</div>
+            </div>
+          </div>
+        </div>
+        <div class="browser-frame">
+          <div class="browser-bar">
+            <div class="browser-dots">
+              <div class="browser-dot red"></div>
+              <div class="browser-dot amber"></div>
+              <div class="browser-dot green"></div>
+            </div>
+            <div class="browser-url">studybestie.app/tools/jordan/mitosis-from-video</div>
+          </div>
+          <div class="browser-content">
+            <div class="transcript-preview">
+              <div class="video-stub">
+                <div class="play-btn">▶</div>
+                <span>Mitosis explained in 60 seconds · TikTok @biologynerdd</span>
+              </div>
+              <div class="transcript-cards">
+                <div class="t-card">
+                  <div class="t-label">Key concept</div>
+                  <div class="t-val">Mitosis = cell division producing 2 identical daughter cells (diploid)</div>
+                </div>
+                <div class="t-card">
+                  <div class="t-label">The 4 stages</div>
+                  <div class="t-val">Prophase → Metaphase → Anaphase → Telophase</div>
+                </div>
+                <div class="t-card">
+                  <div class="t-label">Common exam trap</div>
+                  <div class="t-val">Mitosis ≠ meiosis. Mitosis → 2 cells. Meiosis → 4 cells (haploid)</div>
+                </div>
+                <div class="t-card">
+                  <div class="t-label">Your weak spot</div>
+                  <div class="t-val">You often mix up anaphase and telophase — see notes ↓</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3: Practice quiz -->
+      <div class="superpower-card">
+        <div class="sc-trigger">
+          <div>
+            <div class="sc-chat-bubble">Quiz me on Module B — Gatsby. Make it hard, focus on technique analysis</div>
+          </div>
+          <div class="sc-trigger-label">You →</div>
+        </div>
+        <div class="sc-response">
+          <div>
+            <div class="sc-bot-bubble">
+              10-question timed quiz, all technique analysis. Starts easy, gets harder. Your results feed back into your study plan.
+              <div class="link-pill">🔗 Open: gatsby-module-b-quiz.html</div>
+            </div>
+          </div>
+        </div>
+        <div class="browser-frame">
+          <div class="browser-bar">
+            <div class="browser-dots">
+              <div class="browser-dot red"></div>
+              <div class="browser-dot amber"></div>
+              <div class="browser-dot green"></div>
+            </div>
+            <div class="browser-url">studybestie.app/tools/priya/gatsby-module-b-quiz</div>
+          </div>
+          <div class="browser-content">
+            <div class="quiz-preview">
+              <h4>📝 Module B — Gatsby · Q4 of 10</h4>
+              <div class="quiz-q">The green light is described as "minute and far away." What does Fitzgerald achieve by using this imagery?</div>
+              <div class="quiz-opts-preview">
+                <div class="quiz-opt-prev wrong">A) It shows Gatsby is visually impaired</div>
+                <div class="quiz-opt-prev correct">B) It positions the dream as perpetually out of reach — desire over attainment ✓</div>
+                <div class="quiz-opt-prev">C) It symbolises Daisy's wealth and status</div>
+              </div>
+              <div class="quiz-score-bar">
+                <span>3/4 correct</span>
+                <div class="score-bar-track"><div class="score-bar-fill" style="width:75%"></div></div>
+                <span>75%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="text-align:center; margin-top: 36px; padding: 20px; background: var(--bg-soft); border-radius: 14px;">
+      <div style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">
+        Every tool is built for <strong style="color:var(--text);">you specifically</strong> — your subjects, your gaps, your language. Not a template. Not a generic resource. Yours.
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="label">How it works</div>
+  <h2>Set up once. Works forever.</h2>
+  <p class="body-text">StudyBestie isn't self-serve — it's set up for you, personalised to your subjects and learning style, and ready to go in under 30 minutes.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-line"></div>
+      <div class="step-content">
+        <h3>Claim your spot</h3>
+        <p>Join the waitlist. For the first 5 students it's completely free — no credit card, no catch. Just your email and we'll reach out to book your setup call.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-line"></div>
+      <div class="step-content">
+        <h3>30-minute setup call</h3>
+        <p>We configure StudyBestie with your subjects, exam dates, and how you study. Nothing to install — just Telegram, which you've already got. You leave with it ready to go.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-line"></div>
+      <div class="step-content">
+        <h3>Just start chatting</h3>
+        <p>It's on your home screen. Any subject, any time. It remembers every session and builds a picture of how you think — and where to push you harder.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIFECYCLE -->
+<div class="problem-bg" style="background: var(--bg-soft);">
+  <section>
+    <div class="label">Grows with you</div>
+    <h2>It doesn't expire after HSC.</h2>
+    <p class="body-text">Every other tool resets — you outgrow it, start over. StudyBestie compounds. The bestie that got you through the HSC becomes the thinking partner that helps you build a career.</p>
+    <div class="lifecycle-scroll">
+      <div class="stage-card active">
+        <div class="stage-label">You are here →</div>
+        <h4>🎒 HSC</h4>
+        <p>Essay feedback, subject help, exam prep, study plans, stress support</p>
+      </div>
+      <div class="stage-card">
+        <div class="stage-label">Stage 2</div>
+        <h4>🎓 University</h4>
+        <p>Research synthesis, thesis support, assignment feedback, career prep</p>
+      </div>
+      <div class="stage-card">
+        <div class="stage-label">Stage 3</div>
+        <h4>💼 Early career</h4>
+        <p>Workplace navigation, communication, performance prep</p>
+      </div>
+      <div class="stage-card">
+        <div class="stage-label">Stage 4</div>
+        <h4>🚀 Founder</h4>
+        <p>Business planning, strategy, decision-making support</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FINAL CTA -->
+<div class="final-cta" id="waitlist">
+  <div class="slots-remaining">
+    <span>🟡</span>
+    <span>3 of 5 founding spots taken</span>
+    <span class="slots-pips">
+      <span class="slot-pip taken"></span>
+      <span class="slot-pip taken"></span>
+      <span class="slot-pip taken"></span>
+      <span class="slot-pip free"></span>
+      <span class="slot-pip free"></span>
+    </span>
+  </div>
+  <h2>Get your free spot.</h2>
+  <p class="cta-sub">The first 5 students get StudyBestie set up for free. After that, there's a small monthly subscription.</p>
+  <div class="free-badge">✅ Free for founding students · No credit card needed</div>
+  <div class="waitlist-form">
+    <input type="email" placeholder="Your email address">
+    <button type="submit">Claim Free Spot</button>
+  </div>
+  <p class="pricing-note">After the founding 5, StudyBestie will be a small monthly subscription — roughly the cost of one tutoring session, for unlimited 24/7 support. <strong>The free spots are first-come, first-served.</strong></p>
+</div>
+
+<footer>
+  <p>StudyBestie is built on the ClaudeClaw stack. © 2026.</p>
+</footer>
+
+<script>
+  // ── QUIZ LOGIC ──
+  const answers = {};
+
+  function selectOption(btn) {
+    const q = btn.dataset.q;
+    document.querySelectorAll(`.quiz-option[data-q="${q}"]`).forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    answers[q] = parseInt(btn.dataset.v);
+    const allAnswered = Object.keys(answers).length === 3;
+    document.getElementById('score-submit-btn').classList.toggle('ready', allAnswered);
+  }
+
+  function showResult() {
+    const total = (answers[1] || 0) + (answers[2] || 0) + (answers[3] || 0);
+    document.getElementById('quiz-form').style.display = 'none';
+    const result = document.getElementById('score-result');
+    result.classList.add('show');
+
+    let emoji, status, statusClass, desc;
+
+    if (total >= 7) {
+      emoji = '🚨';
+      status = 'Critical — you need a bestie now';
+      statusClass = 'critical';
+      desc = "Exams close, feedback confusing, no solid plan — that's the study spiral. The good news: this is exactly what StudyBestie is built for. Claim your spot before the free ones are gone.";
+    } else if (total >= 4) {
+      emoji = '😬';
+      status = 'Hanging in there — but barely';
+      statusClass = 'hanging';
+      desc = "You've got some things under control but there are cracks. A bit more structure and targeted support could be the difference between a good ATAR and a great one.";
+    } else {
+      emoji = '✅';
+      status = 'Solid — but there\'s a ceiling';
+      statusClass = 'solid';
+      desc = "You're organised and ahead of the game. StudyBestie won't save you — it'll sharpen you. Think of it as the thinking partner that pushes your Band 5 responses into Band 6.";
+    }
+
+    document.getElementById('result-emoji').textContent = emoji;
+    const statusEl = document.getElementById('result-status');
+    statusEl.textContent = status;
+    statusEl.className = 'score-status ' + statusClass;
+    document.getElementById('result-desc').textContent = desc;
+  }
+
+  function resetQuiz() {
+    Object.keys(answers).forEach(k => delete answers[k]);
+    document.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('selected'));
+    document.getElementById('score-submit-btn').classList.remove('ready');
+    document.getElementById('quiz-form').style.display = 'block';
+    const result = document.getElementById('score-result');
+    result.classList.remove('show');
+  }
+
+  // ── DEMO TABS ──
+  function switchTab(id) {
+    document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.demo-panel').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+</script>
+
+</body>
+</html>
